@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+
+  <!-- Remove CM-specific repositories -->
+  <project path="bootable/recovery-twrp" name="omnirom/android_bootable_recovery" remote="github" revision="android-7.1" groups="pdk-cw-fs"/>
+
+  <!-- Samsung Galaxy S4 Exynos Repositories -->
+  <project path="device/samsung/exynos5410-common" name="exynos5410/android_device_samsung_exynos5410-common" remote="github" revision="cm-14.1" />
+  <project path="device/samsung/ja3gxx" name="exynos5410/android_device_samsung_ja3gxx" remote="github" revision="cm-14.1" />
+  <project path="device/samsung/ja3gchnduos" name="exynos5410/android_device_samsung_ja3gchnduos" remote="github" revision="cm-14.1" />
+  <project path="device/samsung/ja3gduosctc" name="exynos5410/android_device_samsung_ja3gduosctc" remote="github" revision="cm-14.1" />
+  <project path="device/samsung/jalteskt" name="exynos5410/android_device_samsung_jalteskt" remote="github" revision="cm-14.1" />
+  <project path="device/samsung/jaltelgt" name="exynos5410/android_device_samsung_jaltelgt" remote="github" revision="cm-14.1" />
+  <project path="kernel/samsung/exynos5410" name="exynos5410/android_kernel_samsung_exynos5410" remote="github" revision="cm-14.1" />
+  <project path="vendor/samsung" name="exynos5410/proprietary_vendor_samsung" remote="github" revision="cm-14.1" />
+
+  <project path="hardware/samsung_slsi-cm/exynos" name="LineageOS/android_hardware_samsung_slsi-cm_exynos" remote="github" revision="cm-14.1" />
+  <project path="hardware/samsung_slsi-cm/exynos5" name="LineageOS/android_hardware_samsung_slsi-cm_exynos5" remote="github" revision="cm-14.1" />
+  <project path="hardware/samsung_slsi-cm/exynos5410" name="exynos5410/android_hardware_samsung_slsi-cm_exynos5410" remote="github" revision="cm-14.1" />
+  <project path="hardware/samsung_slsi-cm/openmax" name="LineageOS/android_hardware_samsung_slsi-cm_openmax" remote="github" revision="cm-14.1" />
+
+</manifest>

@@ -1,0 +1,88 @@
+import init.universal5410.usb.rc
+import init.universal5410.wifi.rc
+
+on init
+    mkdir /efs_gsm 0771 system radio
+    symlink /dev/block/mmcblk0p22 /dev/mbin1
+    restorecon /dev/mbin1
+
+on post-fs-data
+    #h2k permission
+    mkdir /efs/cpk 0771 radio system
+    chmod 0644 /efs/redata.bin
+    chmod 0644 /efs/cpk/redata.bin
+    chown radio radio /efs/h2k.dat
+    chown radio radio /efs/cpk/h2k.dat
+    chmod 0644 /efs/h2k.dat
+    chmod 0644 /efs/cpk/h2k.dat
+    chown system system /efs/drm/h2k
+
+    # Permission
+    chown radio system /sys/power/wake_lock
+    chmod 0660 /sys/power/wake_lock
+
+    ## NFC_BROADCOM
+    chmod 0600 /dev/bcm2079x
+    chown nfc nfc /dev/bcm2079x
+    mkdir /data/bcmnfc 0700 nfc nfc
+    mkdir /data/bcmnfc/param 0700 nfc nfc
+
+    ## mobicore
+    mkdir /data/app/mcRegistry 0775 system system
+    chmod 0766 /dev/mobicore
+    chmod 0666 /dev/mobicore-user
+    chmod 0660 /dev/s5p-smem
+    chown system system /dev/mobicore
+    chown radio system /dev/mobicore-user
+    chown system system /dev/s5p-smem
+
+    ## Telephony
+    chmod 0644 /proc/cmdline
+    chown root radio /proc/cmdline
+
+    # (additional) SEAndroid Restore context for efs files
+    restorecon -R /efs_gsm
+
+    # Remove symlinks to avoid issues with migrate after nandroid restores
+    # Will be recreated at end of boot
+    rmdir /data/data/com.android.providers.telephony/databases
+    rmdir /data/data/com.android.providers.telephony/shared_prefs
+    rm /data/data/com.android.providers.telephony/databases
+    rm /data/data/com.android.providers.telephony/shared_prefs
+
+on property:sys.boot_completed=1
+    # Symlink directories to access telephony.db and preferred-apn.xml required by cbd
+    symlink /data/user_de/0/com.android.providers.telephony/databases /data/data/com.android.providers.telephony/databases
+    symlink /data/user_de/0/com.android.providers.telephony/shared_prefs /data/data/com.android.providers.telephony/shared_prefs
+
+# Parse hardware revision (needs to happen before cbd starts)
+service modemloader /system/bin/modemloader
+    class core
+    oneshot
+
+service ril-daemon /system/bin/rild -l /system/lib/libsecril-cdma-shim.so -- -d /dev/ttyS0 -D 7203 -M no
+    class main
+    socket rild stream 660 root radio
+    socket rild-debug stream 660 radio system
+    user root
+    group radio cache inet misc audio sdcard_r sdcard_rw log
+
+service ril-daemon2 /system/bin/rild -c 2 -- -d /dev/ttyS1 -D 7204
+    class main
+    socket rild2 stream 660 root radio
+    socket rild-debug2 stream 660 radio system
+    user root
+    group radio cache inet misc audio sdcard_r sdcard_rw log qcom_oncrpc diag graphics
+
+# GPS for Qualcomm-SamsungIPC
+service secgpsd /system/bin/secgpsd
+    class main
+    socket secgps seqpacket 0660 gps system
+    user gps
+    group system inet
+
+service at_distributor /system/bin/at_distributor
+    class late_start
+    user root
+    group radio misc log
+

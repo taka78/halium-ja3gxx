@@ -1,0 +1,125 @@
+import init.universal5410.usb.rc
+import init.universal5410.wifi.rc
+
+on init
+    symlink /data/tombstones /tombstones
+
+on post-fs-data
+    symlink /data/user_de/0/com.android.providers.telephony/databases /data/data/com.android.providers.telephony/databases
+    symlink /data/user_de/0/com.android.providers.telephony/shared_prefs /data/data/com.android.providers.telephony/shared_prefs
+
+# MDM requirement
+    mkdir /data/cp_log
+    chmod 0775 /data/cp_log
+    chown system radio /data/cp_log
+
+    mkdir /dev/block/modem
+    symlink /dev/block/platform/dw_mmc.0/by-name/m9kefs1 /dev/block/modem/m9kefs1
+    symlink /dev/block/platform/dw_mmc.0/by-name/m9kefs2 /dev/block/modem/m9kefs2
+    symlink /dev/block/platform/dw_mmc.0/by-name/m9kefs3 /dev/block/modem/m9kefs3
+    symlink /dev/block/platform/dw_mmc.0/by-name/ /dev/block/modem/dump_path
+    chown system radio /dev/block/modem/m9kefs1
+    chmod 0775 /dev/block/modem/m9kefs1
+    chown system radio /dev/block/modem/m9kefs2
+    chmod 0775 /dev/block/modem/m9kefs2
+    chown system radio /dev/block/modem/m9kefs3
+    chmod 0775 /dev/block/modem/m9kefs3
+    chown system radio /dev/block/modem/dump_path
+    chmod 0775 /dev/block/modem/dump_path
+
+    mkdir /firmware 0771 system system
+    chown system system /tombstones
+    chmod 0775 /tombstones
+    mkdir /tombstones/modem 0775 system system
+    mkdir /tombstones/lpass 0775 system system
+    mkdir /tombstones/wcnss 0775 system system
+    mkdir /tombstones/dsps 0775 system system
+    rmdir /tombstones/qcks
+    mkdir /tombstones/qcks 771 system system
+    rmdir /tombstones/efs
+    mkdir /tombstones/efs 771 system system
+
+    chown system radio /dev/block/platform/dw_mmc.0/by-name
+    chmod 0775 /dev/block/platform/dw_mmc.0/by-name
+
+on boot
+    chown system system /sys/class/input/input16/enabled
+    chmod 0660 /sys/class/input/input16/enabled
+    chown system system /sys/class/input/input17/enabled
+    chmod 0660 /sys/class/input/input17/enabled
+    chown system system /sys/class/input/input18/enabled
+    chmod 0660 /sys/class/input/input18/enabled
+    chown system system /sys/class/input/input19/enabled
+    chmod 0660 /sys/class/input/input19/enabled
+
+# Permissions for usb_lock
+    chown system radio /sys/class/sec/switch/.usb_lock/enable
+
+# qmuxd
+    mkdir /dev/socket/qmux_radio 2777 radio radio
+    mkdir /dev/socket/qmux_audio 2777 media audio
+    mkdir /dev/socket/qmux_gps 2777 gps gps
+    mkdir /dev/socket/qmux_bluetooth 2777 media bluetooth
+
+    chmod 0666 /dev/socket/qmux_bluetooth/qmux_connect_socket
+    chown media bluetooth /dev/socket/qmux_bluetooth/qmux_connect_socket
+
+    chmod 0666 /dev/socket/qmux_gps/qmux_connect_socket
+    chown gps gps /dev/socket/qmux_gps/qmux_connect_socket
+
+    chmod 0666 /dev/socket/qmux_audio/qmux_connect_socket
+    chown media audio /dev/socket/qmux_audio/qmux_connect_socket
+
+    chmod 0666 /dev/socket/qmux_radio/qmux_connect_socket
+    chown radio radio /dev/socket/qmux_radio/qmux_connect_socket
+
+    chmod 0666 /dev/socket/qmux_radio/proxy_qmux_connect_socket
+    chown radio radio /dev/socket/qmux_radio/proxy_qmux_connect_socket
+
+    chmod 0666 /dev/socket/qmux_radio/proxy_tether_connect_socket
+    chown radio radio /dev/socket/qmux_radio/proxy_tether_connect_socket
+
+# Allow qmuxd to assign port open wait time
+    chown radio radio /sys/devices/virtual/hsicctl/hsicctl0/modem_wait
+    chmod 666 /sys/devices/virtual/hsicctl/hsicctl0/modem_wait
+
+# To prevent out of order acknowledgements from making
+# connection tracking to treat them as not belonging to
+# the connection they belong to.
+# Otherwise, a weird issue happens in which some long
+# connections on high-throughput links get dropped when
+# an ack packet comes out of order
+    write /proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal 1
+   
+# Restorecon
+    restorecon_recursive /tombstones
+    restorecon /tombstones/qcks/temp.dump
+    restorecon /data/.cid.info
+    restorecon /data/ISP_CV
+    restorecon_recursive /efs/wifi
+
+# Waketime fot fast dormancy
+    chown system radio /sys/devices/platform/mdm_hsic_pm0/waketime
+    chmod 0660 /sys/devices/platform/mdm_hsic_pm0/waketime
+
+# Create directories for gpsone_daemon services
+    mkdir /data/misc/gpsone_d 0770 system gps
+
+# Create directories for QuIPS
+    mkdir /data/misc/quipc 0770 system gps
+
+# Create directories for Location services
+    mkdir /data/misc/location 0770 gps gps
+    mkdir /data/misc/location/mq 0770 gps gps
+    mkdir /data/misc/location/xtwifi 0770 gps gps
+
+# QC KickStart
+service qc_kickstart /system/bin/qcks s
+    class core
+    user root
+    group radio cache inet misc audio sdcard_rw log system
+
+service qmuxd /system/bin/qmuxd
+    class main
+    user root
+    group radio log audio bluetooth gps log

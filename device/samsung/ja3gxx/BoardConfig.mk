@@ -26,8 +26,8 @@ $(shell touch $(OUT)/obj/SHARED_LIBRARIES/libril_intermediates/export_includes)
 $(shell cp -rf vendor/samsung/ja3gxx/proprietary/lib $(OUT)/obj)
 $(shell touch $(OUT)/obj/lib/libril.so.toc)
 $(shell cp vendor/samsung/ja3gxx/proprietary/bin/rild  $(OUT)/obj/EXECUTABLES/rild_intermediates/LINKED)
-$(shell touch /home/taka/halium/out/host/linux-x86/bin/bsdiff)
-$(shell chmod 777 /home/taka/halium/out/host/linux-x86/bin/bsdiff)
+$(shell touch $(OUT)/host/linux-x86/bin/bsdiff)
+$(shell chmod 777 $(OUT)/host/linux-x86/bin/bsdiff)
 # Assert
 TARGET_OTA_ASSERT_DEVICE := ja3g,ja3gxx,i9500,GT-I9500
 
